@@ -36,10 +36,12 @@ pub fn getenv(ctx context.Context, key EnvKeyType) string {
 	return os.getenv(key)
 }
 
+// with_env returns a child context that carries env overrides for getenv.
 pub fn with_env(parent context.Context, env EnvMap) context.Context {
 	return context.with_value(parent, env_key, env)
 }
 
+// env_from_context returns env overrides stored in ctx, if any.
 pub fn env_from_context(ctx context.Context) ?EnvMap {
 	val := ctx.value(env_key) or {
 		return none
