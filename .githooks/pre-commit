@@ -1,0 +1,42 @@
+#!/bin/sh
+set -eu
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+# IDEs (IntelliJ, etc.) invoke git with a minimal PATH
+PATH="/usr/bin:/usr/local/bin:${HOME}/.local/bin:${HOME}/go/bin:${PATH:-}"
+
+check_dependencies() {
+	if ! command -v license-eye >/dev/null 2>&1; then
+		echo "pre-commit: license-eye not found in PATH" >&2
+		exit 1
+	fi
+
+	if ! command -v v >/dev/null 2>&1; then
+		echo "pre-commit: v not found in PATH" >&2
+		exit 1
+	fi
+}
+
+check_license_headers() {
+  echo "pre-commit: checking license headers"
+  license-eye header check -c .licenserc.yaml
+}
+
+check_v_fmt() {
+	echo "pre-commit: v fmt -verify"
+	v fmt -verify .
+}
+
+check_v_vet() {
+	echo "pre-commit: v vet"
+	v vet .
+}
+
+check_dependencies
+check_license_headers
+check_v_fmt
+check_v_vet
+
+echo "pre-commit: all checks passed"
